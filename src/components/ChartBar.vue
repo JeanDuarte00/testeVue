@@ -69,10 +69,7 @@ export default {
     }).finally(()=>{
       console.log("DATA: " + this.dataValues)
       console.log("DATA: " + this.chartLabels)
-      console.log("DATA: " + this.rankNames)
 
-
-        
       this.data = computed(() => ({
         labels: this.chartLabels,
         datasets: [
