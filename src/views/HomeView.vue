@@ -1,13 +1,10 @@
 <template>
   <div>
-  <ChartBar :dataValues = "rankNomes" />
-  
-    <hr>
+    <ChartBar :rankNames = "rankNomes" />
     <ul v-for="(item,index) in rankNomes" :key="index">
         <li>{{item.ranking}} - {{item.nome}} (frequencia = {{ item.frequencia }})</li>
     </ul>
-    
-   </div>
+  </div>
 </template>
 
 <script>
@@ -38,9 +35,10 @@ export default {
   mounted() {
     // Açailandia = 2100055
     this.service.listarRankingDeNomesPorLocalidade(2100055).then(result => {
-          console.log(result.data);
-          if(result.length == 1)
-            this.rankNomes = result[0].res;
+      if(result[0].res.length > 0)
+          this.rankNomes = result[0].res;
+          console.log(result[0].res);
+
        });
   }
 }

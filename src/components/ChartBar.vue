@@ -1,17 +1,23 @@
 <template>
-  <div>
-  <p>{{"oi"}}</p>
-  <p>{{teste}}</p>
-  <BarChart
-    :chart-data="data"
-    :options="options"
-    css-classes="chart-container"
-  />
+   <div class="content">
+    <BarChart
+      :chart-data="data"
+      :options="options"
+      css-classes="chart-container"
+    />
   </div>
 </template>
 
-<script setup>
-import api from '@/services/api'
+<style scoped>
+  .content{
+    padding: 20px;
+    margin: 20px;
+    background-color: #e2e2e2;
+  }
+</style>
+
+<script >
+import IbgeService from '@/services/IbgeService'
 import pattern from "patternomaly"
 import { ref, computed } from "vue"
 import { BarChart } from "vue-chart-3"
@@ -23,53 +29,88 @@ import {
   BarElement
 } from "chart.js"
 
-console.log("OI")
-
-let teste;
-api.get("/v1/localidades/estados/21/municipios").then(response => {
-  console.log(response.data);
-  console.log(response.data[0]);
-  teste = response.data[0].nome;
-});
-
 Chart.register(BarController, CategoryScale, LinearScale, BarElement)
 
-//let dataValues = ref(teste)
+// PROPRIEDADES DO COMPONENTE
+export default {
+  name: 'ChartBar',
 
-const dataValues = ref([
-  [1, 3, 5, 7, 2, 4, 6],
-  [1, 5, 2, 6, 3, 7, 4],
-  [1, 5, 2, 6, 3, 7, 4]
-])
-
-
-const data = computed(() => ({
-  labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-
-  datasets: [
-    {
-      label: "Foo",
-      data: dataValues.value[0],
-      backgroundColor: pattern.draw("dash", "#268bd2")
-    },
-    {
-      label: "Bar",
-      data: dataValues.value[1],
-      backgroundColor: pattern.draw("dot", "#2aa198")
-    },
-    {
-      label: "Ok",
-      data: dataValues.value[2],
-      backgroundColor: pattern.draw("line", "#ff0000")
+  data(){
+    return{
+      service: IbgeService,
+      dataValues: [],
+      chartLabels: [],
+      data: computed,
+      options: ref
     }
-  ]
-}))
+  },
+  components: {
+    BarChart,
+  },
+   created(){
+    this.service = new IbgeService();
+    this.chartLabels = [];
+  },
+  mounted() {
+    this.service.listarRankingDeNomesPorLocalidade(2100055).then(result => {
+      console.log(result[0].res.length);
+      let labelList = [];
+      let valueList = [];
 
-const options = ref({
-  plugins: {
-    title: {
-      text: "Bar"
-    }
+      if(result[0].res.length > 0)
+        for(let i = 0; i < result[0].res.length; i++){
+          labelList.push(result[0].res[i].nome);
+          valueList.push(result[0].res[i].frequencia);
+        }
+        this.chartLabels = labelList;
+        this.dataValues = valueList;
+
+
+    }).finally(()=>{
+      console.log("DATA: " + this.dataValues)
+      console.log("DATA: " + this.chartLabels)
+      console.log("DATA: " + this.rankNames)
+
+
+        
+      this.data = computed(() => ({
+        labels: this.chartLabels,
+        datasets: [
+          {
+            data: this.dataValues,
+            backgroundColor: pattern.draw("dot", "#414141")
+          }    
+        ]
+      }))
+
+      this.options = ref({
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            text: "Bar"
+          }
+        }
+      })
+
+    });
   }
-})
+}
+
+
+
+
+ 
+  
+
+  // dataValues = [
+  //   10,
+  //   23,
+  //   2,
+  //   5,
+  //   5
+  // ]
+  
+
 </script>
+
